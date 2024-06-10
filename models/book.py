@@ -8,7 +8,7 @@ class Book(Base):
 
     id = Column(String(12), primary_key=True, nullable=False)
     title = Column(String(100), nullable=False)
-    description = Column(String(500), nullable=True)
+    description = Column(String(1000), nullable=True)
     published_date = Column(Date, nullable=True)
     page_count = Column(Integer, nullable=True)
     thumbnail = Column(String(200), nullable=True)
