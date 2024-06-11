@@ -1,20 +1,23 @@
-from fastapi import HTTPException
+from fastapi import Depends
 from sqlalchemy.orm import Session
 from models.book import Book
 from schemas.book import BookBase
 
+from app.dependencies import get_db
 
-def get_book_by_id(book_id: str, db: Session):
+
+def get_book_by_id(book_id: str, db: Session = Depends(get_db)):
     book_data = db.query(Book).filter(Book.id == book_id).one_or_none()
     print(f"検索結果表示:{book_data}")
     return book_data
 
 
-def create_book_repo(book: BookBase, db: Session):
+def create_book_repo(book: BookBase, db: Session = Depends(get_db)):
     print(f"{book.id}のデータを検索")
     book_data = db.query(Book).filter(Book.id == book.id).one_or_none()
     if book_data:
-        raise HTTPException(status_code=400, detail="Book already registered")
+        print(f"書籍ID {book.id} は登録済みです")
+        return {}
 
     try:
         print("保存処理を開始")
@@ -31,4 +34,6 @@ def create_book_repo(book: BookBase, db: Session):
         db.refresh(db_book)
         return db_book
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error occurred: {str(e)}")
+        db.rollback()
+        print(f"Error occurred while creating book: {str(e)}")
+        return {}
